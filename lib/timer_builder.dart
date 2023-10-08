@@ -30,8 +30,8 @@ class TimerBuilder extends StatefulWidget {
 
   /// Rebuilds periodically
   TimerBuilder.periodic(
-    Duration interval, {
-
+    Duration interval,
+    bool conditional, {
     /// Specifies the alignment unit for the generated time events. Specify Duration.zero
     /// if you want no alignment. By default, the alignment unit is computed from the interval.
     Duration? alignment,
@@ -39,12 +39,12 @@ class TimerBuilder extends StatefulWidget {
     /// Builds the widget. Called for every time event or when the widget needs to be built/rebuilt.
     required this.builder,
   }) : this.generator = periodicTimer(interval,
-            alignment: alignment ?? getAlignmentUnit(interval));
+            alignment: alignment ?? getAlignmentUnit(interval),
+            conditional: conditional);
 
   /// Rebuilds on a schedule
   TimerBuilder.scheduled(
     Iterable<DateTime> schedule, {
-
     /// Builds the widget. Called for every time event or when the widget needs to be built/rebuilt.
     required this.builder,
   }) : this.generator = scheduledTimer(schedule);
@@ -91,8 +91,11 @@ class _TimerBuilderState extends State<TimerBuilder> {
   }
 }
 
-TimerGenerator periodicTimer(Duration interval,
-    {Duration alignment = Duration.zero}) {
+TimerGenerator periodicTimer(
+  Duration interval, {
+  Duration alignment = Duration.zero,
+  required bool conditional,
+}) {
   assert(interval > Duration.zero);
 
   DateTime? next;
@@ -101,7 +104,7 @@ TimerGenerator periodicTimer(Duration interval,
     if (now.compareTo(next!) < 0) {
       next = alignDateTime(now.add(interval), alignment);
     }
-    return next!;
+    return conditional ? next! : DateTime(1970);
   };
 }
 
